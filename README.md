@@ -28,7 +28,7 @@ This mode is ideal for coding. It starts a development server that automatically
 Open your terminal in the `LMS-Frontend` directory and run:
 
 ```bash
-docker build -t lms-frontend:dev --target dev -f Dockerfile.Frontend .
+docker build --tag lms-frontend:dev-container --target dev -f Dockerfile.Frontend .
 ```
 
 **Step 2: Run the development container**
@@ -36,8 +36,9 @@ docker build -t lms-frontend:dev --target dev -f Dockerfile.Frontend .
 This command starts the container and syncs your local source code directory with the container's working directory. This is what enables live updates.
 
 ```bash
-docker run -it --rm -p 5173:5173 -v "$(pwd)":/lms-app-frontend lms-frontend:dev
+docker run -it --rm -p 5173:5173 -v "$(pwd)":/lms-app-frontend lms-frontend:dev-container
 ```
+
 
 -   **URL**: Your application will be available at [http://localhost:5173](http://localhost:5173).
 -   Changes you make to the code on your machine will be reflected instantly in the browser.
@@ -51,7 +52,7 @@ This mode builds the final, optimized static files and serves them with a minima
 **Step 1: Build the production Docker image**
 
 ```bash
-docker build -t lms-frontend:latest -f Dockerfile.Frontend .
+docker build -t lms-frontend:latest-container -f Dockerfile.Frontend .
 ```
 
 *Note: By not specifying a `--target`, Docker automatically builds the final stage in the file, which is our production stage.*
@@ -59,7 +60,33 @@ docker build -t lms-frontend:latest -f Dockerfile.Frontend .
 **Step 2: Run the production container**
 
 ```bash
-docker run -it --rm -p 3000:3000 lms-frontend:latest
+docker run -it --rm -p 3000:3000 lms-frontend:latest-container
 ```
 
 -   **URL**: The production version of your app can be viewed at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Alternative way to run docker (Preferred)
+Start in background (build and run)
+```bash
+docker-compose -f docker-compose.dev.yml up -d --build
+```
+
+Check status
+```bash
+docker compose -f docker-compose.dev.yml logs -f
+```
+
+View logs
+```bash
+docker-compose -f docker-compose.dev.yml logs -f
+```
+
+Stop
+```bash
+docker-compose -f docker-compose.dev.yml down
+```
+
+-   **URL**: Your application will be available at [http://localhost:3000](http://localhost:3000).
+-   Changes you make to the code on your machine will be reflected instantly in the browser.

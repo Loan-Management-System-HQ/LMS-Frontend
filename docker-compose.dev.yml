@@ -1,0 +1,14 @@
+services:
+  lms-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.Frontend
+      target: dev
+    ports:
+      - "3000:5173"
+    volumes:
+      - ./lms-app-frontend:/app
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - HOST=0.0.0.0
