@@ -1,0 +1,19 @@
+.footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #1e3a8a;
+  color: white;
+  font-size: 0.9rem;
+  border-top: 4px solid #2563eb;
+  margin-top: 2rem;
+}
+
+.footer p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.footer p:hover {
+  opacity: 1;
+  transition: opacity 0.3s;
+}

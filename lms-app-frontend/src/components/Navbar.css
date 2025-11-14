@@ -1,0 +1,88 @@
+/* Full-width gradient background */
+.navbar {
+  width: 100%;
+  background: linear-gradient(90deg, #1e3a8a, #2563eb);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Inner wrapper to control content alignment */
+.navbar-content {
+  max-width: 1280px; /* keeps layout centered on large screens */
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  /* width: 100%; */
+}
+
+/* Left section: logo + title */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-logo {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+}
+
+.navbar-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  margin: 0;
+}
+
+/* Right section: login button */
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.login-button {
+  background: #fff;
+  color: #1e3a8a;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: #dbeafe;
+  transform: scale(1.05);
+}
+
+/* Responsive layout */
+@media (max-width: 600px) {
+  .navbar-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .navbar-left {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .navbar-right {
+    align-self: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  .login-button {
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+  }
+}
