@@ -7,8 +7,7 @@ import Footer from "./components/Footer";
 
 import Body from "./pages/SimBody";
 import PreApply from "./pages/PreApply";
-// import ApplyPage from "./pages/ApplyPage";  // add when needed
-// import LandingPage from "./pages/LandingPage"; // add when needed
+import Payment from "./pages/Payment";
 
 import "./App.css";
 
@@ -16,18 +15,17 @@ export default function App() {
   return (
     <Router>
       <div className="app">
-        <Navbar />
+        <Navbar />  
 
         <Routes>
-          {/* Main Simulation Page */}
+          {/* Default page */}
           <Route path="/" element={<Body />} />
 
-          {/* Pre-Application Page */}
+          {/* Loan application pre-form */}
           <Route path="/preapply" element={<PreApply />} />
 
-          {/* You can add more pages later */}
-          {/* <Route path="/apply" element={<ApplyPage />} /> */}
-          {/* <Route path="/home" element={<LandingPage />} /> */}
+          {/* Payment page */}
+          <Route path="/payment" element={<Payment />} />   
         </Routes>
 
         <Footer />
