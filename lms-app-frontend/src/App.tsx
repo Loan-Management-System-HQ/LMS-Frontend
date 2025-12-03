@@ -12,6 +12,7 @@ import PastPay from "./pages/PastPay";
 import StaffLoans from "./pages/StaffLoans";
 import StaffApproval from "./pages/StaffApproval";
 
+
 export default function App() {
   return (
     <Router>
