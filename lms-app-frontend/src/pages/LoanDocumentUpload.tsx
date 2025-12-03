@@ -17,11 +17,13 @@ import { CloudUpload, Delete, CheckCircle, FileText } from "lucide-react";
 import "./LoanDocumentUpload.css";
 
 interface UploadedFile {
+    id: string;
     name: string;
     type: string;
     size: number;
     progress: number;
     status: "uploading" | "completed" | "error";
+    file: File;
 }
 
 const LoanDocumentUpload: React.FC = () => {
@@ -34,54 +36,77 @@ const LoanDocumentUpload: React.FC = () => {
     const requiredDocs = [
         "Government Issued Identity (Passport/Driver's License)",
         "Credit Score Report",
-        "Paystub (Last 3 months)",
         "Bank Statement (Last 6 months)",
     ];
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             const newFiles = Array.from(event.target.files).map((file) => ({
+                id: Math.random().toString(36).substr(2, 9),
                 name: file.name,
                 type: file.type,
                 size: file.size,
                 progress: 0,
                 status: "uploading" as const,
+                file: file // Store the actual file object
             }));
 
             setFiles((prev) => [...prev, ...newFiles]);
-            simulateUpload(newFiles);
+
+            // Upload each file
+            newFiles.forEach(fileWrapper => {
+                uploadFile(fileWrapper);
+            });
         }
     };
 
-    const simulateUpload = (newFiles: UploadedFile[]) => {
-        setIsUploading(true);
+    const uploadFile = (fileWrapper: UploadedFile) => {
+        const formData = new FormData();
+        formData.append("file", fileWrapper.file);
+        formData.append("loanId", loanId || "unknown");
 
-        newFiles.forEach((file, _index) => {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:3001/upload");
 
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const progress = Math.round((event.loaded / event.total) * 100);
                 setFiles((prevFiles) =>
                     prevFiles.map((f) =>
-                        f.name === file.name ? { ...f, progress: Math.min(progress, 100) } : f
+                        f.id === fileWrapper.id ? { ...f, progress } : f
                     )
                 );
+            }
+        };
 
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setFiles((prevFiles) =>
-                        prevFiles.map((f) =>
-                            f.name === file.name ? { ...f, status: "completed" } : f
-                        )
-                    );
-                    setIsUploading(false);
-                }
-            }, 300);
-        });
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                setFiles((prevFiles) =>
+                    prevFiles.map((f) =>
+                        f.id === fileWrapper.id ? { ...f, status: "completed", progress: 100 } : f
+                    )
+                );
+            } else {
+                setFiles((prevFiles) =>
+                    prevFiles.map((f) =>
+                        f.id === fileWrapper.id ? { ...f, status: "error" } : f
+                    )
+                );
+            }
+        };
+
+        xhr.onerror = () => {
+            setFiles((prevFiles) =>
+                prevFiles.map((f) =>
+                    f.id === fileWrapper.id ? { ...f, status: "error" } : f
+                )
+            );
+        };
+
+        xhr.send(formData);
     };
-
-    const handleDelete = (fileName: string) => {
-        setFiles((prev) => prev.filter((f) => f.name !== fileName));
+    const handleDelete = (id: string) => {
+        setFiles((prev) => prev.filter((f) => f.id !== id));
     };
 
     const handleFinish = () => {
@@ -143,7 +168,7 @@ const LoanDocumentUpload: React.FC = () => {
                                 key={index}
                                 className="file-item"
                                 secondaryAction={
-                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(file.name)}>
+                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(file.id)}>
                                         <Delete size={20} />
                                     </IconButton>
                                 }
@@ -151,6 +176,8 @@ const LoanDocumentUpload: React.FC = () => {
                                 <ListItemIcon>
                                     {file.status === "completed" ? (
                                         <CheckCircle color="green" size={24} />
+                                    ) : file.status === "error" ? (
+                                        <Delete color="red" size={24} />
                                     ) : (
                                         <FileText color="#64748b" size={24} />
                                     )}
@@ -165,6 +192,11 @@ const LoanDocumentUpload: React.FC = () => {
                                             {file.status === "completed" && (
                                                 <span className="upload-complete-text">
                                                     Upload Complete
+                                                </span>
+                                            )}
+                                            {file.status === "error" && (
+                                                <span className="upload-error-text" style={{ color: 'red' }}>
+                                                    Upload Failed
                                                 </span>
                                             )}
                                         </div>
