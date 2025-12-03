@@ -2,11 +2,18 @@
     padding: 1.5rem;
     display: flex;
     gap: 1.5rem;
-    flex-direction: column;
+    flex-direction: row;
+}
+
+@media (max-width: 768px) {
+    .loan-status-container {
+        flex-direction: column;
+    }
 }
 
 .status-sidebar {
-    width: 100%;
+    width: 300px;
+    flex-shrink: 0;
 }
 
 .status-main-content {

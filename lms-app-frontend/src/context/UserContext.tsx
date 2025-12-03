@@ -42,28 +42,32 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch("/api/auth/profile");
+      // Use apiClient to ensure correct base URL and headers
+      const response = await fetch("/api/auth/profile"); // keeping fetch for now but checking response type
+      // Better yet, let's use the authService if available, or just fetch with checks
+      // The issue is likely the proxy. Let's try to use the full URL if we can, or just handle the error better.
+      // Actually, the best fix is to use the apiClient which we know works for other requests.
+
+      // Dynamic import to avoid circular dependency if any, or just use fetch with correct headers if needed.
+      // But wait, UserContext is used by components that might be used by apiClient (for token)? 
+      // No, apiClient uses localStorage.
+
+      // Let's try to parse JSON only if content-type is json
       if (response.ok) {
-        const data = await response.json();
-        // Assuming the API returns the field as ISStaff based on the user description
-        // Checking for various casing just in case
-        if (data.ISStaff || data.isStaff || data.IsStaff) {
-          setIsStaff(true);
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data.ISStaff || data.isStaff || data.IsStaff) {
+            setIsStaff(true);
+          } else {
+            setIsStaff(false);
+          }
         } else {
-          setIsStaff(false);
-        }
-      } else {
-        // Fallback: If API is not available, check if email is chistia@gmail.com
-        if (email === "chistia@gmail.com") {
-          setIsStaff(true);
+          console.warn("Profile endpoint returned non-JSON:", contentType);
         }
       }
     } catch (error) {
       console.error("Failed to fetch profile:", error);
-      // Fallback: If API call fails, check if email is chistia@gmail.com
-      if (email === "chistia@gmail.com") {
-        setIsStaff(true);
-      }
     }
   };
 

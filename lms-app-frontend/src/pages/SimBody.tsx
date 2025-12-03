@@ -294,7 +294,7 @@ export default function Body() {
                   <Typography variant="subtitle1" fontWeight={600} mb={1}>
                     Ending Balance by Period
                   </Typography>
-                  <Box sx={{ width: "100%", height: 320, minHeight: 320 }}>
+                  <Box sx={{ width: "100%", height: 320, minHeight: 320, minWidth: 0 }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
                         data={chartData}

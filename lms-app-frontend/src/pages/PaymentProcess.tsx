@@ -2,8 +2,9 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Alert } from "@mui/material";
 import "./PaymentProcess.css";
+import loanService from "../services/loanService";
 
 interface PaymentFormValues {
     cardName: string;
@@ -16,12 +17,13 @@ interface PaymentState {
     amount?: number;
     loanNumber?: string;
     period?: number;
+    installmentId?: string;
 }
 
 const PaymentProcess: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { amount, loanNumber, period } = (location.state as PaymentState) || {};
+    const { amount, loanNumber, period, installmentId } = (location.state as PaymentState) || {};
 
     const initialValues: PaymentFormValues = {
         cardName: "",
@@ -43,12 +45,23 @@ const PaymentProcess: React.FC = () => {
             .required("CVV is required"),
     });
 
-    const handleSubmit = (values: PaymentFormValues, { setSubmitting }: any) => {
-        setTimeout(() => {
-            alert(`Payment Successful! Paid with card ending in ${values.cardNumber.slice(-4)}`);
+    const handleSubmit = async (values: PaymentFormValues, { setSubmitting, setStatus }: any) => {
+        if (!installmentId || !amount) {
+            setStatus("Invalid payment details.");
             setSubmitting(false);
+            return;
+        }
+
+        try {
+            await loanService.makePayment(installmentId, amount);
+            alert(`Payment Successful! Paid with card ending in ${values.cardNumber.slice(-4)}`);
             navigate("/home/loan-payment");
-        }, 1500);
+        } catch (err) {
+            console.error("Payment failed:", err);
+            setStatus("Payment failed. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -57,6 +70,10 @@ const PaymentProcess: React.FC = () => {
                 <Typography variant="h5" className="payment-title">
                     Secure Payment
                 </Typography>
+
+                {location.state?.error && (
+                    <Alert severity="error" sx={{ mb: 2 }}>{location.state.error}</Alert>
+                )}
 
                 {amount && (
                     <Box sx={{ mb: 3, p: 2, bgcolor: "grey.50", borderRadius: 1, border: "1px solid", borderColor: "grey.200" }}>
@@ -77,8 +94,9 @@ const PaymentProcess: React.FC = () => {
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
                 >
-                    {({ isSubmitting, errors, touched }) => (
+                    {({ isSubmitting, errors, touched, status }) => (
                         <Form className="payment-form">
+                            {status && <Alert severity="error" sx={{ mb: 2 }}>{status}</Alert>}
                             <div className="form-group">
                                 <label htmlFor="cardName" className="form-label">
                                     Cardholder Name

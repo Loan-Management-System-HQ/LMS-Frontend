@@ -14,24 +14,25 @@ export interface LoanApplication {
 }
 
 export interface Loan {
-    id: number;
-    loan_id: string;
+    id: string;
     amount: number;
-    term_months: number;
+    duration: number;
     interest_rate: number;
     status: string;
     created_at: string;
-    remaining_amount: number;
+    outstanding_balance?: number;
+    payment?: number;
 }
 
 export interface Installment {
-    id: number;
+    id: string;
     installment_number: number;
     due_date: string;
-    amount_due: number;
-    amount_paid: number;
+    due_amount: number;
+    payment_amount: number;
     status: string;
-    paid_date?: string;
+    payment_date?: string;
+    is_overdue?: boolean;
 }
 
 export const loanService = {
@@ -82,6 +83,15 @@ export const loanService = {
         const response = await apiClient.post(API_CONFIG.ENDPOINTS.LOANS.CALCULATOR, {
             amount,
             term_months: term
+        });
+        return response.data;
+    },
+
+    // Make a payment
+    makePayment: async (installmentId: string, amount: number) => {
+        const response = await apiClient.post(API_CONFIG.ENDPOINTS.LOANS.PAYMENTS, {
+            installment_id: installmentId,
+            amount: amount
         });
         return response.data;
     },

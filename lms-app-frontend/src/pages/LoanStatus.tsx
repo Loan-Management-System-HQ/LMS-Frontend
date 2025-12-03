@@ -38,7 +38,7 @@ const LoanStatus: React.FC = () => {
                 if (Array.isArray(data)) {
                     setLoans(data);
                     if (data.length > 0) {
-                        setSelectedLoanId(data[0].loan_id);
+                        setSelectedLoanId(data[0].id);
                     }
                 } else {
                     console.error("Unexpected response format:", response);
@@ -66,7 +66,7 @@ const LoanStatus: React.FC = () => {
                 // but getInstallments expects the ID used in the URL.
                 // Assuming loan_id is what we need or we need the numeric id.
                 // Let's find the loan object first
-                const loan = loans.find(l => l.loan_id === selectedLoanId);
+                const loan = loans.find(l => l.id === selectedLoanId);
                 if (loan) {
                     const data = await loanService.getInstallments(loan.id.toString());
                     setRows(data);
@@ -93,7 +93,7 @@ const LoanStatus: React.FC = () => {
         return new Date(dateString).toLocaleDateString();
     };
 
-    const selectedLoan = loans.find((l) => l.loan_id === selectedLoanId);
+    const selectedLoan = loans.find((l) => l.id === selectedLoanId);
 
     if (loading && loans.length === 0) {
         return (
@@ -127,12 +127,12 @@ const LoanStatus: React.FC = () => {
                         <List disablePadding>
                             {loans.map((loan) => (
                                 <ListItem
-                                    key={loan.loan_id}
-                                    onClick={() => setSelectedLoanId(loan.loan_id)}
-                                    className={`loan-list-item ${selectedLoanId === loan.loan_id ? 'selected' : ''}`}
+                                    key={loan.id}
+                                    onClick={() => setSelectedLoanId(loan.id)}
+                                    className={`loan-list-item ${selectedLoanId === loan.id ? 'selected' : ''}`}
                                 >
                                     <ListItemText
-                                        primary={loan.loan_id}
+                                        primary={loan.id.substring(0, 8)}
                                         secondary={formatCurrency(loan.amount)}
                                         primaryTypographyProps={{ className: "loan-list-item-text" }}
                                     />
@@ -159,10 +159,10 @@ const LoanStatus: React.FC = () => {
                 {selectedLoan && (
                     <Paper elevation={3} className="status-header-paper">
                         <Typography variant="h6" gutterBottom>
-                            Loan Details: <strong>{selectedLoan.loan_id}</strong>
+                            Loan Details: <strong>{selectedLoan.id.substring(0, 8)}</strong>
                         </Typography>
                         <Typography variant="body2" className="status-subtitle">
-                            Status: <strong>{selectedLoan.status}</strong> | Amount: <strong>{formatCurrency(selectedLoan.amount)}</strong> | Term: <strong>{selectedLoan.term_months} months</strong>
+                            Status: <strong>{selectedLoan.status}</strong> | Amount: <strong>{formatCurrency(selectedLoan.amount)}</strong> | Term: <strong>{selectedLoan.duration} months</strong>
                         </Typography>
                     </Paper>
                 )}
@@ -198,8 +198,8 @@ const LoanStatus: React.FC = () => {
                                                 {row.installment_number}
                                             </TableCell>
                                             <TableCell>{formatDate(row.due_date)}</TableCell>
-                                            <TableCell align="right">{formatCurrency(row.amount_due)}</TableCell>
-                                            <TableCell align="right">{formatCurrency(row.amount_paid)}</TableCell>
+                                            <TableCell align="right">{formatCurrency(row.due_amount)}</TableCell>
+                                            <TableCell align="right">{formatCurrency(row.payment_amount)}</TableCell>
                                             <TableCell align="center">
                                                 <Chip
                                                     label={row.status}
@@ -214,7 +214,7 @@ const LoanStatus: React.FC = () => {
                                                     variant={row.status === "PENDING" ? "outlined" : "filled"}
                                                 />
                                             </TableCell>
-                                            <TableCell>{formatDate(row.paid_date)}</TableCell>
+                                            <TableCell>{formatDate(row.payment_date)}</TableCell>
                                         </TableRow>
                                     ))
                                 )}

@@ -10,8 +10,6 @@ import Profile from "./Profile";
 import LoanApply from "./LoanApply";
 import LoanPayment from "./LoanPayment";
 
-
-
 import LoanStatus from "./LoanStatus";
 
 import PaymentProcess from "./PaymentProcess";
@@ -34,7 +32,7 @@ const Home: React.FC = () => {
 
           <Route path="/loan-status" element={<LoanStatus />} />
           <Route path="/loan-payment" element={<LoanPayment />} />
-          <Route path="/payment-process" element={<PaymentProcess />} />
+          <Route path="/loan-payment/process/:loanId" element={<PaymentProcess />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/staff" element={<StaffPanel />} />
         </Routes>
