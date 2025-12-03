@@ -1,0 +1,104 @@
+/* Use same font-family as Simbody.css */
+* {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.signin-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.signin-card {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 350px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.signin-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.field {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.field span {
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  transition: 0.2s;
+  font-family: inherit; /* match font-family */
+}
+
+.field input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  font-family: inherit; /* match font-family */
+}
+
+.signin-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  font-family: inherit; /* match font-family */
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.signin-btn:hover {
+  background-color: #1e40af;
+}
+
+.signin-btn:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.signin-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-family: inherit; /* match font-family */
+}
+
+.signin-links a {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.signin-links a:hover {
+  text-decoration: underline;
+}

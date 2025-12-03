@@ -1,0 +1,93 @@
+/* Use same font-family as Simbody.css */
+* {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.signup-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.signup-card {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 380px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.signup-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.field {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.field span {
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.field input {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  transition: 0.2s;
+  font-family: inherit; /* ensure input inherits same font */
+}
+
+.field input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* Submit button styled like SignIn login button */
+.signup-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  font-family: inherit;
+  padding: 0.65rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.signup-btn:hover {
+  background-color: #1e40af;
+}
+
+.signup-btn:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+/* Verification step */
+.verification-info {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  color: #334155;
+  font-family: inherit; /* inherit font-family */
+}

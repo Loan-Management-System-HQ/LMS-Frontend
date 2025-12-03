@@ -1,0 +1,70 @@
+/* Profile Screen */
+
+.profile-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.profile-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.profile-card {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.field span {
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="password"] {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.field input[type="text"]:disabled,
+.field input[type="email"]:disabled {
+  background-color: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.field input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.profile-pic-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-top: 0.5rem;
+  object-fit: cover;
+}
+
+.profile-save-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
