@@ -1,0 +1,74 @@
+import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
+import API_CONFIG from '../config/apiConfig';
+
+// Create axios instance with base configuration
+const apiClient: AxiosInstance = axios.create({
+  baseURL: API_CONFIG.BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, // 10 seconds
+});
+
+// Request interceptor to add auth token
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem('access_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling and token refresh
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    return response;
+  },
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // Handle 401 Unauthorized - attempt token refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) {
+          // No refresh token, redirect to login
+          localStorage.clear();
+          window.location.href = '/signin';
+          return Promise.reject(error);
+        }
+
+        // Attempt to refresh the token
+        const response = await axios.post(
+          `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.TOKEN_REFRESH}`,
+          { refresh: refreshToken }
+        );
+
+        const { access } = response.data;
+        localStorage.setItem('access_token', access);
+
+        // Retry the original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${access}`;
+        }
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, clear storage and redirect to login
+        localStorage.clear();
+        window.location.href = '/signin';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
