@@ -67,14 +67,13 @@ const LoanDocumentUpload: React.FC = () => {
                 const file = newFiles[i];
                 try {
                     // Determine document type based on file name or just use 'OTHER' for now
-                    // In a real app, user might select type. defaulting to 'OTHER' or mapping based on requirements.
-                    // The backend supports: IDENTITY, INCOME_PROOF, BANK_STATEMENT, CREDIT_REPORT, OTHER
+                    // The backend supports: GOVT_ID, PAYROLL, CREDIT_HISTORY, BANK_STATEMENT, OTHER
                     let docType = "OTHER";
                     const lowerName = file.name.toLowerCase();
-                    if (lowerName.includes("passport") || lowerName.includes("license") || lowerName.includes("id")) docType = "IDENTITY";
-                    else if (lowerName.includes("paystub") || lowerName.includes("salary")) docType = "INCOME_PROOF";
+                    if (lowerName.includes("passport") || lowerName.includes("license") || lowerName.includes("id")) docType = "GOVT_ID";
+                    else if (lowerName.includes("paystub") || lowerName.includes("salary")) docType = "PAYROLL";
                     else if (lowerName.includes("bank") || lowerName.includes("statement")) docType = "BANK_STATEMENT";
-                    else if (lowerName.includes("credit") || lowerName.includes("score")) docType = "CREDIT_REPORT";
+                    else if (lowerName.includes("credit") || lowerName.includes("score")) docType = "CREDIT_HISTORY";
 
                     await documentService.uploadDocument(file, docType, "Uploaded via Loan Application", loanId);
 
@@ -83,14 +82,30 @@ const LoanDocumentUpload: React.FC = () => {
                             f.name === file.name ? { ...f, status: "completed", progress: 100 } : f
                         )
                     );
-                } catch (error) {
+                } catch (error: any) {
                     console.error(`Failed to upload ${file.name}`, error);
                     setFiles((prev) =>
                         prev.map((f) =>
                             f.name === file.name ? { ...f, status: "error", error: "Upload failed" } : f
                         )
                     );
-                    setAlertMessage(`Failed to upload ${file.name}`);
+
+                    let errorMsg = `Failed to upload ${file.name}`;
+                    if (error.response?.data) {
+                        const data = error.response.data;
+                        if (typeof data === 'object') {
+                            const messages = Object.values(data).flat();
+                            if (messages.length > 0) {
+                                errorMsg += `: ${messages[0]}`;
+                            } else {
+                                errorMsg += `: ${JSON.stringify(data)}`;
+                            }
+                        } else {
+                            errorMsg += `: ${String(data)}`;
+                        }
+                    }
+
+                    setAlertMessage(errorMsg);
                     setAlertSeverity("error");
                     setAlertOpen(true);
                 }

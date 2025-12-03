@@ -76,10 +76,12 @@ const LoanApplicationForm: React.FC<{ email: string; currentDate: string; onSucc
                 .required("Period is required")
                 .positive("Period must be positive")
                 .integer("Period must be an integer")
+                .max(360, "Period cannot exceed 360 months (30 years)")
                 .typeError("Period must be a number"),
             rate: Yup.number()
                 .required("Interest Rate is required")
                 .positive("Rate must be positive")
+                .max(100, "Rate cannot exceed 100%")
                 .typeError("Rate must be a number"),
         }),
         onSubmit: async (values) => {
@@ -89,8 +91,6 @@ const LoanApplicationForm: React.FC<{ email: string; currentDate: string; onSucc
                     amount: Number(values.amount),
                     duration: Number(values.period), // Backend expects 'duration', not 'term_months'
                     interest_rate: Number(values.rate), // Backend expects 'interest_rate'
-                    // purpose: values.purpose, // Backend doesn't seem to have 'purpose' in serializer, check if needed
-                    // remarks: ... 
                 });
                 // Assuming response contains the created application object with an id
                 if (response && response.id) {
@@ -100,9 +100,22 @@ const LoanApplicationForm: React.FC<{ email: string; currentDate: string; onSucc
                 }
             } catch (err: any) {
                 console.error("Loan application error:", err);
-                const errorMsg = err.response?.data
-                    ? (typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data)
-                    : "Failed to submit loan application. Please try again.";
+                let errorMsg = "Failed to submit loan application. Please try again.";
+
+                if (err.response?.data) {
+                    const data = err.response.data;
+                    if (typeof data === 'object') {
+                        // Extract first error message from object
+                        const messages = Object.values(data).flat();
+                        if (messages.length > 0) {
+                            errorMsg = String(messages[0]);
+                        } else {
+                            errorMsg = JSON.stringify(data);
+                        }
+                    } else {
+                        errorMsg = String(data);
+                    }
+                }
                 setError(errorMsg);
             }
         },
