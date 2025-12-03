@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-content">
-        <button className="navbar-logo-button" onClick={() => navigate("/")}>
+        <button className="navbar-logo-button" onClick={() => navigate(email ? "/home" : "/")}>
           <img src={Logo} alt="Logo" className="navbar-logo" />
         </button>
 

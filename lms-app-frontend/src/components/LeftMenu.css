@@ -1,13 +1,11 @@
 .left-menu {
   width: 240px;
   background: #1e1e2f;
-  height: 100vh;
+  min-height: calc(100vh - 64px); /* Adjust based on navbar height */
   padding: 20px 15px;
   color: #fff;
-  position: fixed;
-  top: 0;
-  left: 0;
   border-right: 1px solid #333;
+  flex-shrink: 0; /* Prevent shrinking in flex container */
 }
 
 .menu-title {
@@ -56,8 +54,9 @@
 
 /* Main page body pushes right of menu */
 .main-content {
-  margin-left: 240px;
+  flex: 1;
   padding: 25px;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
   background: #f7f7fb;
+  overflow-x: hidden; /* Prevent horizontal scroll if content overflows */
 }

@@ -1,4 +1,8 @@
 {
+	"scripts": {
+		"dev": "pnpm -C lms-app-frontend run dev",
+		"build": "pnpm -C lms-app-frontend run build"
+	},
 	"dependencies": {
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
