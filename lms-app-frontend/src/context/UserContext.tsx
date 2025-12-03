@@ -52,9 +52,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         } else {
           setIsStaff(false);
         }
+      } else {
+        // Fallback: If API is not available, check if email is chistia@gmail.com
+        if (email === "chistia@gmail.com") {
+          setIsStaff(true);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch profile:", error);
+      // Fallback: If API call fails, check if email is chistia@gmail.com
+      if (email === "chistia@gmail.com") {
+        setIsStaff(true);
+      }
     }
   };
 
