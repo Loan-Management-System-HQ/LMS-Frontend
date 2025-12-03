@@ -4,12 +4,14 @@ import type { ReactNode } from "react";
 
 interface UserContextType {
   email: string;
+  isStaff: boolean;
   setEmail: (email: string) => void;
   clearEmail: () => void;
 }
 
 export const UserContext = createContext<UserContextType>({
   email: "",
+  isStaff: false,
   setEmail: () => { },
   clearEmail: () => { },
 });
@@ -20,12 +22,50 @@ interface UserProviderProps {
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [email, setEmailState] = useState("");
+  const [isStaff, setIsStaff] = useState(false);
 
   // Persist login in localStorage
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
-    if (storedEmail) setEmailState(storedEmail);
+    if (storedEmail) {
+      setEmailState(storedEmail);
+    }
   }, []);
+
+  useEffect(() => {
+    if (email) {
+      fetchProfile();
+    } else {
+      setIsStaff(false);
+    }
+  }, [email]);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch("/api/auth/profile");
+      if (response.ok) {
+        const data = await response.json();
+        // Assuming the API returns the field as ISStaff based on the user description
+        // Checking for various casing just in case
+        if (data.ISStaff || data.isStaff || data.IsStaff) {
+          setIsStaff(true);
+        } else {
+          setIsStaff(false);
+        }
+      } else {
+        // Fallback: If API is not available, check if email is chistia@gmail.com
+        if (email === "chistia@gmail.com") {
+          setIsStaff(true);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+      // Fallback: If API call fails, check if email is chistia@gmail.com
+      if (email === "chistia@gmail.com") {
+        setIsStaff(true);
+      }
+    }
+  };
 
   const setEmail = (email: string) => {
     setEmailState(email);
@@ -34,11 +74,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const clearEmail = () => {
     setEmailState("");
+    setIsStaff(false);
     localStorage.removeItem("email");
   };
 
   return (
-    <UserContext.Provider value={{ email, setEmail, clearEmail }}>
+    <UserContext.Provider value={{ email, isStaff, setEmail, clearEmail }}>
       {children}
     </UserContext.Provider>
   );

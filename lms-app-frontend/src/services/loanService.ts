@@ -2,11 +2,15 @@ import apiClient from './apiClient';
 import API_CONFIG from '../config/apiConfig';
 
 export interface LoanApplication {
+    id?: string;
     amount: number;
     duration: number;
     interest_rate: number;
     purpose?: string;
     remarks?: string;
+    status?: string;
+    created_at?: string;
+    customer_name?: string;
 }
 
 export interface Loan {
@@ -58,6 +62,18 @@ export const loanService = {
     // Get loan applications
     getApplications: async () => {
         const response = await apiClient.get(API_CONFIG.ENDPOINTS.LOANS.APPLICATIONS);
+        return response.data;
+    },
+
+    // Approve loan application (Staff only)
+    approveApplication: async (id: string) => {
+        const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.LOANS.APPLICATIONS}${id}/approve/`);
+        return response.data;
+    },
+
+    // Reject loan application (Staff only)
+    rejectApplication: async (id: string) => {
+        const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.LOANS.APPLICATIONS}${id}/reject/`);
         return response.data;
     },
 
