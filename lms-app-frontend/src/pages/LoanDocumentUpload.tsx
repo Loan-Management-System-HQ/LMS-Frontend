@@ -14,6 +14,7 @@ import {
     LinearProgress,
 } from "@mui/material";
 import { CloudUpload, Delete, CheckCircle, FileText } from "lucide-react";
+import "./LoanDocumentUpload.css";
 
 interface UploadedFile {
     name: string;
@@ -89,25 +90,26 @@ const LoanDocumentUpload: React.FC = () => {
     };
 
     return (
-        <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+        <div className="loan-upload-container">
             <Button
                 onClick={() => navigate("/home/loan-application")}
+                className="upload-back-btn"
                 sx={{ mb: 2 }}
             >
                 &larr; Back to Application
             </Button>
 
-            <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-                <Typography variant="h5" gutterBottom fontWeight="bold" color="primary">
+            <Paper elevation={3} className="upload-paper">
+                <Typography variant="h5" className="upload-title">
                     Upload Documents
                 </Typography>
-                <Typography variant="subtitle1" gutterBottom>
+                <Typography variant="subtitle1" className="upload-subtitle">
                     Application ID: <strong>#{loanId}</strong>
                 </Typography>
 
-                <Alert severity="info" sx={{ my: 2 }}>
+                <Alert severity="info" className="upload-alert">
                     Please upload the following documents to complete your application:
-                    <ul style={{ margin: "0.5rem 0 0 1rem" }}>
+                    <ul className="upload-list">
                         {requiredDocs.map((doc, i) => (
                             <li key={i}>{doc}</li>
                         ))}
@@ -115,16 +117,8 @@ const LoanDocumentUpload: React.FC = () => {
                 </Alert>
 
                 <Box
-                    sx={{
-                        border: "2px dashed #cbd5e1",
-                        borderRadius: 2,
-                        p: 4,
-                        textAlign: "center",
-                        cursor: "pointer",
-                        bgcolor: "#f8fafc",
-                        "&:hover": { bgcolor: "#f1f5f9", borderColor: "#94a3b8" }
-                    }}
                     component="label"
+                    className="dropzone"
                 >
                     <input
                         type="file"
@@ -134,30 +128,25 @@ const LoanDocumentUpload: React.FC = () => {
                         accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                     />
                     <CloudUpload size={48} color="#64748b" />
-                    <Typography variant="h6" color="text.secondary" sx={{ mt: 1 }}>
+                    <Typography variant="h6" className="dropzone-text">
                         Click to Upload Documents
                     </Typography>
-                    <Typography variant="body2" color="text.disabled">
+                    <Typography variant="body2" className="dropzone-subtext">
                         Supported formats: PDF, JPG, PNG, DOC
                     </Typography>
                 </Box>
 
                 {files.length > 0 && (
-                    <List sx={{ mt: 3 }}>
+                    <List className="file-list">
                         {files.map((file, index) => (
                             <ListItem
                                 key={index}
+                                className="file-item"
                                 secondaryAction={
                                     <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(file.name)}>
                                         <Delete size={20} />
                                     </IconButton>
                                 }
-                                sx={{
-                                    border: "1px solid #e2e8f0",
-                                    borderRadius: 1,
-                                    mb: 1,
-                                    bgcolor: "white"
-                                }}
                             >
                                 <ListItemIcon>
                                     {file.status === "completed" ? (
@@ -169,16 +158,16 @@ const LoanDocumentUpload: React.FC = () => {
                                 <ListItemText
                                     primary={file.name}
                                     secondary={
-                                        <Box sx={{ width: "100%", mr: 1 }}>
+                                        <div className="file-progress-container">
                                             {file.status === "uploading" && (
                                                 <LinearProgress variant="determinate" value={file.progress} sx={{ mt: 1 }} />
                                             )}
                                             {file.status === "completed" && (
-                                                <Typography variant="caption" color="success.main">
+                                                <span className="upload-complete-text">
                                                     Upload Complete
-                                                </Typography>
+                                                </span>
                                             )}
-                                        </Box>
+                                        </div>
                                     }
                                 />
                             </ListItem>
@@ -186,7 +175,7 @@ const LoanDocumentUpload: React.FC = () => {
                     </List>
                 )}
 
-                <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
+                <div className="submit-container">
                     <Button
                         variant="contained"
                         color="primary"
@@ -196,9 +185,9 @@ const LoanDocumentUpload: React.FC = () => {
                     >
                         Submit Documents
                     </Button>
-                </Box>
+                </div>
             </Paper>
-        </Box>
+        </div>
     );
 };
 

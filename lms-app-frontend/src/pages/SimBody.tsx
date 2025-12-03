@@ -115,7 +115,9 @@ export default function Body() {
       sx={{
         maxWidth: 1200,
         mx: "auto",
-        my: 4,
+        mx: "auto",
+        mt: 2,
+        mb: 4,
         px: { xs: 2, md: 0 },
       }}
     >
