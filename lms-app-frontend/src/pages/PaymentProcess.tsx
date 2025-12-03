@@ -13,9 +13,10 @@ interface PaymentFormValues {
 }
 
 const PaymentProcess: React.FC = () => {
+    console.log("PaymentProcess component is rendering");
     const navigate = useNavigate();
     const location = useLocation();
-    const amount = location.state?.amount;
+    const { amount, loanNumber, period } = location.state || {};
 
     const initialValues: PaymentFormValues = {
         cardName: "",
@@ -49,8 +50,22 @@ const PaymentProcess: React.FC = () => {
         <Box sx={{ p: 3 }}>
             <div className="payment-process-container">
                 <Typography variant="h5" className="payment-title">
-                    Secure Payment {amount ? `of $${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}
+                    Secure Payment
                 </Typography>
+
+                {amount && (
+                    <Box sx={{ mb: 3, p: 2, bgcolor: "grey.50", borderRadius: 1, border: "1px solid", borderColor: "grey.200" }}>
+                        <Typography variant="subtitle1" gutterBottom>
+                            <strong>Loan Number:</strong> {loanNumber}
+                        </Typography>
+                        <Typography variant="subtitle1" gutterBottom>
+                            <strong>Period:</strong> {period}
+                        </Typography>
+                        <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+                            <strong>Amount Due:</strong> ${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </Typography>
+                    </Box>
+                )}
 
                 <Formik
                     initialValues={initialValues}
