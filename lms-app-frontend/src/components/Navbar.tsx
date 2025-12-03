@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
     navigate("/home/profile");
   };
 
-  const hideLogin = location.pathname === "/signin";
+  const hideLogin = location.pathname === "/signin" || location.pathname === "/";
 
   return (
     <nav className="navbar">

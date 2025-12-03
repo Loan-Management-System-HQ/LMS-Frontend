@@ -11,6 +11,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Forgot from "./pages/Forgot";
 import Home from "./pages/Home";
+import LandingPage from "./pages/LandingPage";
 
 import { UserProvider } from "./context/UserContext";
 
@@ -25,7 +26,8 @@ export default function App() {
 
           <Routes>
             {/* PUBLIC ROUTES */}
-            <Route path="/" element={<Body />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/simulation" element={<Body />} />
             <Route path="/preapply" element={<PreApply />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
