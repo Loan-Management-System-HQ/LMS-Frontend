@@ -15,6 +15,7 @@ import LoanDocumentUpload from "./LoanDocumentUpload";
 import LoanStatus from "./LoanStatus";
 
 import PaymentProcess from "./PaymentProcess";
+import StaffPanel from "./StaffPanel";
 
 const Home: React.FC = () => {
   const { email } = useContext(UserContext);
@@ -35,6 +36,7 @@ const Home: React.FC = () => {
           <Route path="/loan-payment" element={<LoanPayment />} />
           <Route path="/payment-process" element={<PaymentProcess />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/staff" element={<StaffPanel />} />
         </Routes>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Home,
@@ -6,10 +6,13 @@ import {
   FileText,
   CheckCircle,
   CreditCard,
+  Shield,
 } from "lucide-react";
 import "./LeftMenu.css";
+import { UserContext } from "../context/UserContext";
 
 const LeftMenu: React.FC = () => {
+  const { isStaff } = useContext(UserContext);
   return (
     <div className="left-menu">
       <h2 className="menu-title">Dashboard</h2>
@@ -65,6 +68,18 @@ const LeftMenu: React.FC = () => {
           <CreditCard size={18} />
           <span>Loan Payment</span>
         </NavLink>
+
+        {isStaff && (
+          <NavLink
+            to="/home/staff"
+            className={({ isActive }) =>
+              isActive ? "menu-item active" : "menu-item"
+            }
+          >
+            <Shield size={18} />
+            <span>Staff Panel</span>
+          </NavLink>
+        )}
       </nav>
     </div>
   );
