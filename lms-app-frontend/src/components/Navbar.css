@@ -9,46 +9,40 @@
   z-index: 100;
 }
 
-/* Inner wrapper to control content alignment */
+/* Content wrapper */
 .navbar-content {
-  max-width: 1280px; /* keeps layout centered on large screens */
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
 }
 
-/* Left section */
+/* Left section (logo) */
 .navbar-left {
   display: flex;
   align-items: center;
 }
 
-/* White rounded card behind logo */
-.navbar-logo-button {
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 4px 12px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+/* Rounded white card around logo */
+.logo-container {
+  background: white;
+  padding: 6px 14px;
+  border-radius: 14px; /* Rounded edges */
   display: flex;
   align-items: center;
-}
-
-/* Remove outline when clicking */
-.navbar-logo-button:focus {
-  outline: none;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 
 .navbar-logo {
-  height: 40px; /* Adjust size if you want larger */
+  height: 40px;
   width: auto;
   object-fit: contain;
 }
 
-/* Right section */
+/* Right section (login button) */
 .navbar-right {
   display: flex;
   align-items: center;
@@ -61,25 +55,26 @@
   padding: 0.5rem 1.2rem;
   font-size: 0.95rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  transition: all 0.3s ease;
 }
 
 .login-button:hover {
   background: #dbeafe;
-  transform: translateY(-1px) scale(1.02);
+  transform: scale(1.05);
 }
 
-/* Responsive layout */
+/* Responsive */
 @media (max-width: 600px) {
   .navbar-content {
-    padding: 0.6rem 1rem;
+    flex-direction: column;
+    padding: 1rem;
   }
 
-  .navbar-logo {
-    height: 36px;
+  .navbar-right {
+    align-self: flex-end;
+    margin-top: 0.5rem;
   }
 
   .login-button {

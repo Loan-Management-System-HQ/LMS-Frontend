@@ -8,28 +8,25 @@ import Footer from "./components/Footer";
 import Body from "./pages/SimBody";
 import PreApply from "./pages/PreApply";
 import Payment from "./pages/Payment";
-
-import "./App.css";
+import PastPay from "./pages/PastPay";
+import StaffLoans from "./pages/StaffLoans";
+import StaffApproval from "./pages/StaffApproval";
 
 export default function App() {
   return (
     <Router>
-      <div className="app">
-        <Navbar />  
+      <Navbar />
 
-        <Routes>
-          {/* Default page */}
-          <Route path="/" element={<Body />} />
+      <Routes>
+        <Route path="/" element={<Body />} />
+        <Route path="/preapply" element={<PreApply />} />
+        <Route path="/payment" element={<Payment />} />
+        <Route path="/pastpay" element={<PastPay />} />
+        <Route path="/staff-loans" element={<StaffLoans />} />
+        <Route path="/staff-approval/:loanId" element={<StaffApproval />} />
+      </Routes>
 
-          {/* Loan application pre-form */}
-          <Route path="/preapply" element={<PreApply />} />
-
-          {/* Payment page */}
-          <Route path="/payment" element={<Payment />} />   
-        </Routes>
-
-        <Footer />
-      </div>
+      <Footer />
     </Router>
   );
 }

@@ -1,8 +1,8 @@
 // src/components/Navbar.tsx
 import React from "react";
-import "./Navbar.css";
-import Logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
+import "./Navbar.css";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -10,26 +10,21 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-content">
-
-        {/* Clickable logo */}
-        <div className="navbar-left">
-          <button
-            className="navbar-logo-button"
-            onClick={() => navigate("/")}
-          >
-            <img
-              src={Logo}
-              alt="FastFunding logo"
-              className="navbar-logo"
-            />
-          </button>
+        {/* LOGO BUTTON */}
+        <div
+          className="navbar-left"
+          onClick={() => navigate("/")}
+          style={{ cursor: "pointer" }}
+        >
+          <div className="logo-container">
+            <img src={logo} alt="FastFunding Logo" className="navbar-logo" />
+          </div>
         </div>
 
-        {/* Right section */}
+        {/* LOGIN BUTTON */}
         <div className="navbar-right">
           <button className="login-button">Login</button>
         </div>
-
       </div>
     </nav>
   );
