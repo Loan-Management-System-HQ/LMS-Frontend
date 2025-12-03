@@ -18,7 +18,7 @@ import {
     TableRow,
     Chip,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+
 import "./LoanApply.css";
 import { loanService } from "../services/loanService";
 
@@ -197,7 +197,7 @@ const LoanApplicationForm: React.FC<{ email: string; currentDate: string; onSucc
 
 const LoanApply: React.FC = () => {
     const { email } = useContext(UserContext);
-    const navigate = useNavigate();
+    // const navigate = useNavigate(); // Unused
     const currentDate = new Date().toLocaleDateString();
 
     const [tabValue, setTabValue] = useState(0);
@@ -236,11 +236,7 @@ const LoanApply: React.FC = () => {
         setTabValue(newValue);
     };
 
-    const handleUploadClick = () => {
-        if (loanId) {
-            navigate(`/home/loan-application/upload/${loanId}`);
-        }
-    };
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -276,28 +272,26 @@ const LoanApply: React.FC = () => {
                         <LoanApplicationForm
                             email={email || ""}
                             currentDate={currentDate}
-                            onSuccess={(id) => setLoanId(id)}
+                            onSuccess={(id) => {
+                                setLoanId(id);
+                                setTabValue(1); // Switch to History tab
+                            }}
                         />
                     ) : (
                         <Box sx={{ textAlign: "center", py: 3 }}>
                             <Alert severity="success" sx={{ mb: 3 }}>
-                                Loan Application Initiated Successfully!
+                                Loan Application Submitted Successfully!
                             </Alert>
-                            <Typography variant="h5" gutterBottom color="primary">
-                                Loan ID: #{loanId.substring(0, 8)}...
-                            </Typography>
                             <Typography variant="body1" paragraph>
-                                Your application has been generated. Please upload the required documents to proceed.
+                                Your application has been submitted and is now under review. You can track its status in the History tab.
                             </Typography>
-
                             <Button
                                 variant="contained"
-                                color="secondary"
-                                size="large"
-                                onClick={handleUploadClick}
+                                color="primary"
+                                onClick={() => setTabValue(1)}
                                 sx={{ mt: 2 }}
                             >
-                                Upload Documents
+                                View History
                             </Button>
                         </Box>
                     )}
