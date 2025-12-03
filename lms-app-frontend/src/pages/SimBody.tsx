@@ -141,7 +141,7 @@ export default function Body() {
 
           {/* Inputs + Buttons */}
           <Grid container spacing={2} alignItems="flex-end">
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 label="Amount"
                 type="number"
@@ -154,7 +154,7 @@ export default function Body() {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 label="Annual Rate (%)"
                 type="number"
@@ -167,7 +167,7 @@ export default function Body() {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 label="Period (months)"
                 type="number"
@@ -180,11 +180,11 @@ export default function Body() {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={12} sx={{ mt: 2 }}>
               <Stack
                 direction="row"
-                spacing={1}
-                justifyContent={{ xs: "flex-start", md: "flex-end" }}
+                spacing={2}
+                justifyContent="flex-end"
                 flexWrap="wrap"
               >
                 <Button
