@@ -215,9 +215,9 @@ export default function Body() {
                   variant="contained"
                   color="success"
                   sx={{ textTransform: "none", fontWeight: 600 }}
-                  onClick={() => navigate("/preapply")}
+                  onClick={() => navigate("/home/loan-application")}
                 >
-                  I want a loan
+                  Apply for Loan
                 </Button>
               </Stack>
             </Grid>

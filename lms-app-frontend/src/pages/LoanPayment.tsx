@@ -1,8 +1,27 @@
 import React, { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { generateSchedule } from "../utils/SimCalc";
-import "./LoanPayment.css";
+import type { ScheduleRow } from "../interfaces/ScheduleRow";
+import {
+    Box,
+    Card,
+    CardContent,
+    Button,
+    Typography,
+    TableContainer,
+    Paper,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Stack,
+    Chip,
+} from "@mui/material";
 
 const LoanPayment: React.FC = () => {
+    const navigate = useNavigate();
+
     // Constants as per requirement
     const loanAmount = 200000;
     const periodMonths = 360;
@@ -25,59 +44,93 @@ const LoanPayment: React.FC = () => {
         val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     return (
-        <div className="loan-payment-container">
-            <div className="loan-header">
-                <span className="loan-number">Loan Number: {loanNumber}</span>
-                <div>
-                    <strong>Principal:</strong> ${formatCurrency(loanAmount)} |{" "}
-                    <strong>Rate:</strong> {interestRate}% |{" "}
-                    <strong>Term:</strong> {periodMonths} Months
-                </div>
-            </div>
+        <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
+            {/* Header Section */}
+            <Card elevation={3} sx={{ mb: 3, borderRadius: 2 }}>
+                <CardContent>
+                    <Stack
+                        direction={{ xs: "column", md: "row" }}
+                        justifyContent="space-between"
+                        alignItems={{ xs: "flex-start", md: "center" }}
+                        spacing={2}
+                    >
+                        <Box>
+                            <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
+                                Loan Payment
+                            </Typography>
+                            <Typography variant="subtitle1" fontWeight="medium">
+                                Loan Number: {loanNumber}
+                            </Typography>
+                            <Stack direction="row" spacing={1} mt={1} alignItems="center">
+                                <Chip label={`Principal: $${formatCurrency(loanAmount)}`} size="small" variant="outlined" />
+                                <Chip label={`Rate: ${interestRate}%`} size="small" variant="outlined" />
+                                <Chip label={`Term: ${periodMonths} Months`} size="small" variant="outlined" />
+                            </Stack>
+                        </Box>
 
-            <div className="payment-table-container">
-                <table className="payment-table">
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Beginning Balance</th>
-                            <th>Interest</th>
-                            <th>Paid Amount</th>
-                            <th>Ending Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {displayRows.map((row, index) => {
+                        <Button
+                            variant="contained"
+                            color="success"
+                            size="large"
+                            onClick={() => {
+                                const dueAmount = displayRows[displayRows.length - 1].payment;
+                                navigate("/home/loan-application", { state: { amount: dueAmount } });
+                            }}
+                            sx={{ minWidth: 150, textTransform: "none", fontWeight: 600 }}
+                        >
+                            Make Payment
+                        </Button>
+                    </Stack>
+                </CardContent>
+            </Card>
+
+            {/* Payment Schedule Table */}
+            <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
+                <Table sx={{ minWidth: 650 }} aria-label="payment schedule table">
+                    <TableHead sx={{ bgcolor: "grey.100" }}>
+                        <TableRow>
+                            <TableCell><strong>Period</strong></TableCell>
+                            <TableCell align="right"><strong>Beginning Balance</strong></TableCell>
+                            <TableCell align="right"><strong>Interest</strong></TableCell>
+                            <TableCell align="right"><strong>Paid Amount</strong></TableCell>
+                            <TableCell align="right"><strong>Ending Balance</strong></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {displayRows.map((row: ScheduleRow, index: number) => {
+                            // Highlight the last row as the current due payment
                             const isLastRow = index === displayRows.length - 1;
 
-                            // For the last row (11th row, index 10), we show the button.
-                            // For previous rows, we show the calculated payment.
-
                             return (
-                                <tr key={row.period}>
-                                    <td>{row.period}</td>
-                                    <td>{formatCurrency(row.beginning)}</td>
-                                    <td>{formatCurrency(row.interest)}</td>
-                                    <td>
+                                <TableRow
+                                    key={row.period}
+                                    sx={{
+                                        '&:last-child td, &:last-child th': { border: 0 },
+                                        bgcolor: isLastRow ? "action.hover" : "inherit"
+                                    }}
+                                >
+                                    <TableCell component="th" scope="row">
+                                        {row.period}
+                                    </TableCell>
+                                    <TableCell align="right">{formatCurrency(row.beginning)}</TableCell>
+                                    <TableCell align="right">{formatCurrency(row.interest)}</TableCell>
+                                    <TableCell align="right">
                                         {isLastRow ? (
-                                            <button
-                                                className="pay-btn"
-                                                onClick={() => alert(`Initiating payment for Period ${row.period}`)}
-                                            >
-                                                Payment
-                                            </button>
+                                            <Typography color="primary" fontWeight="bold">
+                                                {formatCurrency(row.payment)} (Due)
+                                            </Typography>
                                         ) : (
                                             formatCurrency(row.payment)
                                         )}
-                                    </td>
-                                    <td>{formatCurrency(row.ending)}</td>
-                                </tr>
+                                    </TableCell>
+                                    <TableCell align="right">{formatCurrency(row.ending)}</TableCell>
+                                </TableRow>
                             );
                         })}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
     );
 };
 

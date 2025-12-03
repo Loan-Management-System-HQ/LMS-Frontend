@@ -1,28 +1,3 @@
-import React, { useState, useEffect } from "react";
-import {
-    Box,
-    Typography,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Chip,
-    CircularProgress,
-} from "@mui/material";
-import "./LoanStatus.css";
-
-interface LoanStatusRow {
-    period: number;
-    beginningBalance: number;
-    interest: number;
-    paidAmount: number;
-    endingBalance: number;
-    status: "Paid" | "Pending" | "Overdue";
-    paymentDate?: string;
-}
 
 import React, { useState, useEffect } from "react";
 import {

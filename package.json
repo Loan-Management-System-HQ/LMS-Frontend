@@ -8,6 +8,8 @@
 		"@emotion/styled": "^11.14.1",
 		"@mui/material": "^7.3.5",
 		"@mui/styled-engine-sc": "^7.3.5",
-		"styled-components": "^6.1.19"
+		"formik": "^2.4.9",
+		"styled-components": "^6.1.19",
+		"yup": "^1.7.1"
 	}
 }
