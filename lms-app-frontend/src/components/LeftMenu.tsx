@@ -27,7 +27,7 @@ const LeftMenu: React.FC = () => {
         </NavLink>
 
         <NavLink
-          to="/home/simulation"
+          to="/simulation"
           className={({ isActive }) =>
             isActive ? "menu-item active" : "menu-item"
           }

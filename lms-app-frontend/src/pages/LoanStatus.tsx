@@ -14,7 +14,6 @@ import {
     List,
     ListItem,
     ListItemText,
-    Box,
 } from "@mui/material";
 import "./LoanStatus.css";
 
@@ -131,7 +130,6 @@ const LoanStatus: React.FC = () => {
                         {loans.map((loan) => (
                             <ListItem
                                 key={loan.id}
-                                button
                                 onClick={() => setSelectedLoanId(loan.id)}
                                 className={`loan-list-item ${selectedLoanId === loan.id ? 'selected' : ''}`}
                             >

@@ -1,5 +1,6 @@
 // src/pages/SimBody.tsx
-import React, { useState, useMemo, ChangeEvent } from "react";
+import React, { useState, useMemo } from "react";
+import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ResponsiveContainer,
@@ -36,7 +37,8 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import type { LoanInputs } from "../interfaces/LoanInputs";
 import type { ScheduleRow } from "../interfaces/ScheduleRow";
-import { OverrideMap, generateSchedule } from "../utils/SimCalc";
+import { generateSchedule } from "../utils/SimCalc";
+import type { OverrideMap } from "../utils/SimCalc";
 
 const formatMoney = (v: number | string) =>
   Number(v).toLocaleString(undefined, {
@@ -59,7 +61,7 @@ export default function Body() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -115,7 +117,6 @@ export default function Body() {
       sx={{
         maxWidth: 1200,
         mx: "auto",
-        mx: "auto",
         mt: 2,
         mb: 4,
         px: { xs: 2, md: 0 },
@@ -140,7 +141,7 @@ export default function Body() {
 
           {/* Inputs + Buttons */}
           <Grid container spacing={2} alignItems="flex-end">
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <TextField
                 label="Amount"
                 type="number"
@@ -153,7 +154,7 @@ export default function Body() {
               />
             </Grid>
 
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <TextField
                 label="Annual Rate (%)"
                 type="number"
@@ -166,7 +167,7 @@ export default function Body() {
               />
             </Grid>
 
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <TextField
                 label="Period (months)"
                 type="number"
@@ -179,7 +180,7 @@ export default function Body() {
               />
             </Grid>
 
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <Stack
                 direction="row"
                 spacing={1}

@@ -56,7 +56,7 @@ const LoanDocumentUpload: React.FC = () => {
     const simulateUpload = (newFiles: UploadedFile[]) => {
         setIsUploading(true);
 
-        newFiles.forEach((file, index) => {
+        newFiles.forEach((file, _index) => {
             let progress = 0;
             const interval = setInterval(() => {
                 progress += 10;

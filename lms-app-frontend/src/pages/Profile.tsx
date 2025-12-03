@@ -4,7 +4,7 @@ import { UserContext } from "../context/UserContext";
 import "./Profile.css";
 
 const Profile: React.FC = () => {
-  const { email, name } = useContext(UserContext);
+  const { email } = useContext(UserContext);
 
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [password, setPassword] = useState("");
@@ -53,7 +53,7 @@ const Profile: React.FC = () => {
       <div className="profile-card">
         <div className="field">
           <span>Name</span>
-          <input type="text" value={name} disabled />
+          <input type="text" value={""} disabled />
         </div>
 
         <div className="field">

@@ -25,7 +25,7 @@ const SignIn: React.FC = () => {
 
   useEffect(() => {
     const valid = emailInput && !emailError && password.trim() !== "";
-    setIsFormValid(valid);
+    setIsFormValid(Boolean(valid));
     console.log("isFormValid:", valid, { emailInput, password, emailError });
   }, [emailInput, emailError, password]);
 

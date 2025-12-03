@@ -13,7 +13,7 @@ const Dashboard: React.FC = () => {
         </Typography>
 
         <Grid container spacing={4} mt={1}>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Card elevation={3} sx={{ borderRadius: 3 }}>
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h5" gutterBottom fontWeight="bold" color="#1e293b">
@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
                     Explore our features:
                   </Typography>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" sx={{ mb: 1 }}>
                         <strong>Simulation:</strong> Calculate payments and visualize amortization schedules.
                       </Typography>
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
                         <strong>Loan Application:</strong> Apply for new loans with ease.
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" sx={{ mb: 1 }}>
                         <strong>Loan Status:</strong> Track the progress of your applications in real-time.
                       </Typography>

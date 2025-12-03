@@ -12,11 +12,16 @@ interface PaymentFormValues {
     cvv: string;
 }
 
+interface PaymentState {
+    amount?: number;
+    loanNumber?: string;
+    period?: number;
+}
+
 const PaymentProcess: React.FC = () => {
-    console.log("PaymentProcess component is rendering");
     const navigate = useNavigate();
     const location = useLocation();
-    const { amount, loanNumber, period } = location.state || {};
+    const { amount, loanNumber, period } = (location.state as PaymentState) || {};
 
     const initialValues: PaymentFormValues = {
         cardName: "",

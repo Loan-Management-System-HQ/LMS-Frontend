@@ -73,14 +73,16 @@ const LoanPayment: React.FC = () => {
                             color="success"
                             size="large"
                             onClick={() => {
-                                const lastRow = displayRows[displayRows.length - 1];
-                                navigate("/home/payment-process", {
-                                    state: {
-                                        amount: lastRow.payment,
-                                        loanNumber: loanNumber,
-                                        period: lastRow.period
-                                    }
-                                });
+                                if (displayRows.length > 0) {
+                                    const lastRow = displayRows[displayRows.length - 1];
+                                    navigate("/home/payment-process", {
+                                        state: {
+                                            amount: lastRow.payment,
+                                            loanNumber: loanNumber,
+                                            period: lastRow.period
+                                        }
+                                    });
+                                }
                             }}
                             sx={{ minWidth: 150, textTransform: "none", fontWeight: 600 }}
                         >

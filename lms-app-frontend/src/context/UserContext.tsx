@@ -1,5 +1,6 @@
 // src/context/UserContext.tsx
-import React, { createContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
 
 interface UserContextType {
   email: string;
@@ -9,8 +10,8 @@ interface UserContextType {
 
 export const UserContext = createContext<UserContextType>({
   email: "",
-  setEmail: () => {},
-  clearEmail: () => {},
+  setEmail: () => { },
+  clearEmail: () => { },
 });
 
 interface UserProviderProps {
