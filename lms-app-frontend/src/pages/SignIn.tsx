@@ -1,89 +1,111 @@
 // src/screens/SignIn.tsx
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import "./SignIn.css";
 import { UserContext } from "../context/UserContext";
+import authService from "../services/authService";
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
   const { setEmail } = useContext(UserContext);
-
-  const [emailInput, setEmailInput] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
-  const [isFormValid, setIsFormValid] = useState(false);
 
-  const validateEmail = (value: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .email("Invalid email format")
+        .required("Email is required"),
+      password: Yup.string().required("Password is required"),
+    }),
+    onSubmit: async (values) => {
+      setLoading(true);
+      setFormError("");
+      try {
+        await authService.login({
+          email: values.email,
+          password: values.password,
+        });
 
-  useEffect(() => {
-    if (!emailInput) setEmailError("");
-    else if (!validateEmail(emailInput)) setEmailError("Invalid email format");
-    else setEmailError("");
-  }, [emailInput]);
-
-  useEffect(() => {
-    const valid = emailInput && !emailError && password.trim() !== "";
-    setIsFormValid(Boolean(valid));
-    console.log("isFormValid:", valid, { emailInput, password, emailError });
-  }, [emailInput, emailError, password]);
-
-  const handleSignIn = () => {
-    if (!isFormValid) {
-      setFormError("Please fill all fields correctly.");
-      return;
-    }
-    setFormError("");
-
-    setEmail(emailInput); // save in context + localStorage
-
-    navigate("/home"); // go to Home layout
-  };
+        setEmail(values.email); // save in context
+        navigate("/home"); // go to Home layout
+      } catch (err: any) {
+        console.error("Login failed:", err);
+        if (err.response?.data?.error) {
+          setFormError(err.response.data.error);
+        } else if (err.response?.data?.detail) {
+          setFormError(err.response.data.detail);
+        } else {
+          setFormError("Login failed. Please check your credentials.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
 
   return (
     <div className="body-container signin-wrapper">
       <div className="signin-card">
         <h2 className="signin-title">User Login</h2>
+        <form onSubmit={formik.handleSubmit}>
+          <div className="field">
+            <span>Email Address</span>
+            <input
+              type="email"
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Enter your email"
+              disabled={loading}
+            />
+            {formik.touched.email && formik.errors.email ? (
+              <p className="error-text">{formik.errors.email}</p>
+            ) : null}
+          </div>
 
-        <div className="field">
-          <span>Email Address</span>
-          <input
-            type="email"
-            value={emailInput}
-            onChange={(e) => setEmailInput(e.target.value)}
-            placeholder="Enter your email"
-          />
-          {emailError && <p className="error-text">{emailError}</p>}
-        </div>
+          <div className="field">
+            <span>Password</span>
+            <input
+              type="password"
+              name="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Enter your password"
+              disabled={loading}
+            />
+            {formik.touched.password && formik.errors.password ? (
+              <p className="error-text">{formik.errors.password}</p>
+            ) : null}
+          </div>
 
-        <div className="field">
-          <span>Password</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-          />
-        </div>
+          {formError && <p className="error-text">{formError}</p>}
 
-        {formError && <p className="error-text">{formError}</p>}
+          <button
+            type="submit"
+            className="btn-primary signin-btn"
+            disabled={!formik.isValid || !formik.dirty || loading}
+          >
+            {loading ? "Signing In..." : "Sign In"}
+          </button>
 
-        <button
-          className="btn-primary signin-btn"
-          onClick={handleSignIn}
-          disabled={!isFormValid}
-        >
-          Sign In
-        </button>
-
-        <div className="signin-links">
-          <Link to="/signup">Sign Up</Link>
-          <Link to="/forgot">Forgot Password?</Link>
-        </div>
+          <div className="signin-links">
+            <Link to="/signup">Sign Up</Link>
+            <Link to="/forgot">Forgot Password?</Link>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
 export default SignIn;
+

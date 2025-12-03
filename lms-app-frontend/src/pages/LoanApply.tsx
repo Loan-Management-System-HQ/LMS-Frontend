@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { UserContext } from "../context/UserContext";
 import {
     Box,
@@ -20,16 +20,20 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "./LoanApply.css";
+import { loanService } from "../services/loanService";
 
 interface LoanApplication {
-    id: number;
+    id: string;
     amount: string;
-    period: string;
-    rate: string;
-    date: string;
-    status: "Pending" | "Approved" | "Denied";
-    documents: string[];
+    duration: number;
+    interest_rate: string;
+    created_at: string;
+    status: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+    documents: any[]; // Adjust based on actual response
 }
+
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -53,62 +57,185 @@ function CustomTabPanel(props: TabPanelProps) {
     );
 }
 
+const LoanApplicationForm: React.FC<{ email: string; currentDate: string; onSuccess: (id: string) => void }> = ({ email, currentDate, onSuccess }) => {
+    const [error, setError] = useState<string | null>(null);
+
+    const formik = useFormik({
+        initialValues: {
+            amount: "",
+            period: "",
+            rate: "",
+            purpose: "Personal", // Default purpose
+        },
+        validationSchema: Yup.object({
+            amount: Yup.number()
+                .required("Amount is required")
+                .positive("Amount must be positive")
+                .typeError("Amount must be a number"),
+            period: Yup.number()
+                .required("Period is required")
+                .positive("Period must be positive")
+                .integer("Period must be an integer")
+                .typeError("Period must be a number"),
+            rate: Yup.number()
+                .required("Interest Rate is required")
+                .positive("Rate must be positive")
+                .typeError("Rate must be a number"),
+        }),
+        onSubmit: async (values) => {
+            setError(null);
+            try {
+                const response = await loanService.applyForLoan({
+                    amount: Number(values.amount),
+                    duration: Number(values.period), // Backend expects 'duration', not 'term_months'
+                    interest_rate: Number(values.rate), // Backend expects 'interest_rate'
+                    // purpose: values.purpose, // Backend doesn't seem to have 'purpose' in serializer, check if needed
+                    // remarks: ... 
+                });
+                // Assuming response contains the created application object with an id
+                if (response && response.id) {
+                    onSuccess(response.id);
+                } else {
+                    setError("Failed to create application: No ID returned");
+                }
+            } catch (err: any) {
+                console.error("Loan application error:", err);
+                const errorMsg = err.response?.data
+                    ? (typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data)
+                    : "Failed to submit loan application. Please try again.";
+                setError(errorMsg);
+            }
+        },
+    });
+
+    return (
+        <Box component="form" noValidate autoComplete="off" onSubmit={formik.handleSubmit}>
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            <TextField
+                fullWidth
+                label="Applicant Name"
+                value={email}
+                margin="normal"
+                InputProps={{ readOnly: true }}
+                variant="filled"
+            />
+            <TextField
+                fullWidth
+                label="Application Date"
+                value={currentDate}
+                margin="normal"
+                InputProps={{ readOnly: true }}
+                variant="filled"
+            />
+            <TextField
+                fullWidth
+                label="Loan Amount ($)"
+                name="amount"
+                type="number"
+                value={formik.values.amount}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+                helperText={formik.touched.amount && formik.errors.amount}
+                margin="normal"
+                required
+            />
+            <TextField
+                fullWidth
+                label="Period (Months)"
+                name="period"
+                type="number"
+                value={formik.values.period}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.period && Boolean(formik.errors.period)}
+                helperText={formik.touched.period && formik.errors.period}
+                margin="normal"
+                required
+            />
+            <TextField
+                fullWidth
+                label="Proposed Interest Rate (%)"
+                name="rate"
+                type="number"
+                value={formik.values.rate}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.rate && Boolean(formik.errors.rate)}
+                helperText={formik.touched.rate && formik.errors.rate}
+                margin="normal"
+                required
+            />
+
+            <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                size="large"
+                sx={{ mt: 3 }}
+                disabled={formik.isSubmitting || !formik.isValid || !formik.dirty}
+            >
+                {formik.isSubmitting ? <CircularProgress size={24} color="inherit" /> : "Apply"}
+            </Button>
+        </Box>
+    );
+};
+
 const LoanApply: React.FC = () => {
     const { email } = useContext(UserContext);
     const navigate = useNavigate();
     const currentDate = new Date().toLocaleDateString();
 
     const [tabValue, setTabValue] = useState(0);
-    const [amount, setAmount] = useState("");
-    const [period, setPeriod] = useState("");
-    const [rate, setRate] = useState("");
-    const [isApplying, setIsApplying] = useState(false);
-    const [loanId, setLoanId] = useState<number | null>(null);
+    const [loanId, setLoanId] = useState<string | null>(null);
+    const [applications, setApplications] = useState<LoanApplication[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
-    // Mock data for history
-    const [applications] = useState<LoanApplication[]>([
-        {
-            id: 1001,
-            amount: "5000",
-            period: "12",
-            rate: "5.5",
-            date: "10/15/2023",
-            status: "Approved",
-            documents: ["ID.pdf", "Paystub.pdf"],
-        },
-        {
-            id: 1002,
-            amount: "10000",
-            period: "24",
-            rate: "6.0",
-            date: "11/20/2023",
-            status: "Pending",
-            documents: ["ID.pdf"],
-        },
-    ]);
+    const fetchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+            const response: any = await loanService.getApplications();
+            // Handle pagination (DRF returns { count: ..., results: [...] })
+            const data = response.results ? response.results : response;
+
+            // Ensure data is an array
+            if (Array.isArray(data)) {
+                setApplications(data);
+            } else {
+                console.error("Expected array of applications, got:", response);
+                setApplications([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch loan history:", error);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    useEffect(() => {
+        if (tabValue === 1) {
+            fetchHistory();
+        }
+    }, [tabValue]);
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
 
-    const handleApplyClick = () => {
-        if (!amount || !period || !rate) {
-            alert("Please fill in all loan details first.");
-            return;
-        }
-        setIsApplying(true);
-
-        // Simulate API call to get Loan ID
-        setTimeout(() => {
-            const newLoanId = Math.floor(100000 + Math.random() * 900000); // Generate random 6-digit ID
-            setLoanId(newLoanId);
-            setIsApplying(false);
-        }, 1500);
-    };
-
     const handleUploadClick = () => {
         if (loanId) {
             navigate(`/home/loan-application/upload/${loanId}`);
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "APPROVED": return "success";
+            case "REJECTED": return "error";
+            case "SUBMITTED":
+            case "UNDER_REVIEW": return "warning";
+            default: return "default";
         }
     };
 
@@ -133,74 +260,18 @@ const LoanApply: React.FC = () => {
                     </Typography>
 
                     {!loanId ? (
-                        <Box component="form" noValidate autoComplete="off">
-                            <TextField
-                                fullWidth
-                                label="Applicant Name"
-                                value={email || ""}
-                                margin="normal"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                variant="filled"
-                            />
-                            <TextField
-                                fullWidth
-                                label="Application Date"
-                                value={currentDate}
-                                margin="normal"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                variant="filled"
-                            />
-                            <TextField
-                                fullWidth
-                                label="Loan Amount ($)"
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                margin="normal"
-                                required
-                            />
-                            <TextField
-                                fullWidth
-                                label="Period (Months)"
-                                type="number"
-                                value={period}
-                                onChange={(e) => setPeriod(e.target.value)}
-                                margin="normal"
-                                required
-                            />
-                            <TextField
-                                fullWidth
-                                label="Proposed Interest Rate (%)"
-                                type="number"
-                                value={rate}
-                                onChange={(e) => setRate(e.target.value)}
-                                margin="normal"
-                                required
-                            />
-
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth
-                                size="large"
-                                sx={{ mt: 3 }}
-                                onClick={handleApplyClick}
-                                disabled={isApplying}
-                            >
-                                {isApplying ? <CircularProgress size={24} color="inherit" /> : "Apply"}
-                            </Button>
-                        </Box>
+                        <LoanApplicationForm
+                            email={email || ""}
+                            currentDate={currentDate}
+                            onSuccess={(id) => setLoanId(id)}
+                        />
                     ) : (
                         <Box sx={{ textAlign: "center", py: 3 }}>
                             <Alert severity="success" sx={{ mb: 3 }}>
                                 Loan Application Initiated Successfully!
                             </Alert>
                             <Typography variant="h5" gutterBottom color="primary">
-                                Loan ID: #{loanId}
+                                Loan ID: #{loanId.substring(0, 8)}...
                             </Typography>
                             <Typography variant="body1" paragraph>
                                 Your application has been generated. Please upload the required documents to proceed.
@@ -232,42 +303,56 @@ const LoanApply: React.FC = () => {
                                 <TableCell><strong>Period</strong></TableCell>
                                 <TableCell><strong>Rate</strong></TableCell>
                                 <TableCell><strong>Status</strong></TableCell>
-                                <TableCell><strong>Documents</strong></TableCell>
+                                {/* <TableCell><strong>Documents</strong></TableCell> */}
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {applications.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                                >
-                                    <TableCell component="th" scope="row">
-                                        #{row.id}
-                                    </TableCell>
-                                    <TableCell>{row.date}</TableCell>
-                                    <TableCell>${row.amount}</TableCell>
-                                    <TableCell>{row.period} months</TableCell>
-                                    <TableCell>{row.rate}%</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={row.status}
-                                            color={row.status === "Approved" ? "success" : row.status === "Pending" ? "warning" : "error"}
-                                            size="small"
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        {row.documents.length > 0 ? (
-                                            <ul style={{ margin: 0, paddingLeft: "1.2rem" }}>
-                                                {row.documents.map((doc, idx) => (
-                                                    <li key={idx} style={{ fontSize: "0.85rem" }}>{doc}</li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            <span style={{ color: "#94a3b8" }}>None</span>
-                                        )}
+                            {loadingHistory ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} align="center">
+                                        <CircularProgress size={24} />
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : applications.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} align="center">
+                                        No applications found.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                applications.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                                    >
+                                        <TableCell component="th" scope="row">
+                                            #{row.id.substring(0, 8)}
+                                        </TableCell>
+                                        <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
+                                        <TableCell>${row.amount}</TableCell>
+                                        <TableCell>{row.duration} months</TableCell>
+                                        <TableCell>{row.interest_rate}%</TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={row.status}
+                                                color={getStatusColor(row.status)}
+                                                size="small"
+                                            />
+                                        </TableCell>
+                                        {/* <TableCell>
+                                            {row.documents && row.documents.length > 0 ? (
+                                                <ul style={{ margin: 0, paddingLeft: "1.2rem" }}>
+                                                    {row.documents.map((doc, idx) => (
+                                                        <li key={idx} style={{ fontSize: "0.85rem" }}>{doc.display_filename || doc.file_name}</li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <span style={{ color: "#94a3b8" }}>None</span>
+                                            )}
+                                        </TableCell> */}
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>

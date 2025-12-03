@@ -1,7 +1,8 @@
-// src/pages/SimBody.tsx
 import React, { useState, useMemo } from "react";
-import type { ChangeEvent } from "react";
+
 import { useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -51,15 +52,38 @@ const formatCurrency = (v: number | string) => `$${formatMoney(v)}`;
 export default function Body() {
   const navigate = useNavigate();
 
-  const [amount, setAmount] = useState("200000");
-  const [annualRate, setAnnualRate] = useState("7.2");
-  const [months, setMonths] = useState("360");
   const [show, setShow] = useState(true);
   const [overrides, setOverrides] = useState<OverrideMap>({});
 
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  const formik = useFormik({
+    initialValues: {
+      amount: "200000",
+      annualRate: "7.2",
+      months: "360",
+    },
+    validationSchema: Yup.object({
+      amount: Yup.number()
+        .required("Amount is required")
+        .positive("Amount must be positive")
+        .typeError("Amount must be a number"),
+      annualRate: Yup.number()
+        .required("Rate is required")
+        .positive("Rate must be positive")
+        .typeError("Rate must be a number"),
+      months: Yup.number()
+        .required("Months is required")
+        .positive("Months must be positive")
+        .integer("Months must be an integer")
+        .typeError("Months must be a number"),
+    }),
+    onSubmit: (_values) => {
+      setShow(true);
+    },
+  });
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -94,13 +118,22 @@ export default function Body() {
     basePMT: number;
     schedule: ScheduleRow[];
   }>(() => {
+    // Only calculate if values are valid numbers
+    const amount = Number(formik.values.amount);
+    const annualRate = Number(formik.values.annualRate);
+    const months = Number(formik.values.months);
+
+    if (isNaN(amount) || isNaN(annualRate) || isNaN(months)) {
+      return { basePMT: 0, schedule: [] };
+    }
+
     const inputs: LoanInputs = {
-      amount: Number(amount),
-      annualRate: Number(annualRate),
-      months: Number(months),
+      amount,
+      annualRate,
+      months,
     };
     return generateSchedule(inputs, overrides);
-  }, [amount, annualRate, months, overrides]);
+  }, [formik.values.amount, formik.values.annualRate, formik.values.months, overrides]);
 
   const totalInterest = useMemo(
     () => schedule.reduce((acc, r) => acc + r.interest, 0),
@@ -140,89 +173,98 @@ export default function Body() {
           </Typography>
 
           {/* Inputs + Buttons */}
-          <Grid container spacing={2} alignItems="flex-end">
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
-                label="Amount"
-                type="number"
-                fullWidth
-                size="small"
-                value={amount}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setAmount(e.target.value)
-                }
-              />
-            </Grid>
+          <form onSubmit={formik.handleSubmit}>
+            <Grid container spacing={2} alignItems="flex-end">
+              <Grid size={{ xs: 12, md: 4 }}>
+                <TextField
+                  label="Amount"
+                  name="amount"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={formik.values.amount}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.amount && Boolean(formik.errors.amount)}
+                  helperText={formik.touched.amount && formik.errors.amount}
+                />
+              </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
-                label="Annual Rate (%)"
-                type="number"
-                fullWidth
-                size="small"
-                value={annualRate}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setAnnualRate(e.target.value)
-                }
-              />
-            </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <TextField
+                  label="Annual Rate (%)"
+                  name="annualRate"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={formik.values.annualRate}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.annualRate && Boolean(formik.errors.annualRate)}
+                  helperText={formik.touched.annualRate && formik.errors.annualRate}
+                />
+              </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
-                label="Period (months)"
-                type="number"
-                fullWidth
-                size="small"
-                value={months}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setMonths(e.target.value)
-                }
-              />
-            </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <TextField
+                  label="Period (months)"
+                  name="months"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={formik.values.months}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.months && Boolean(formik.errors.months)}
+                  helperText={formik.touched.months && formik.errors.months}
+                />
+              </Grid>
 
-            <Grid size={12} sx={{ mt: 2 }}>
-              <Stack
-                direction="row"
-                spacing={2}
-                justifyContent="flex-end"
-                flexWrap="wrap"
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setShow(true)}
+              <Grid size={12} sx={{ mt: 2 }}>
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  justifyContent="flex-end"
+                  flexWrap="wrap"
                 >
-                  Calculate
-                </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={!formik.isValid}
+                  >
+                    Calculate
+                  </Button>
 
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => setShow(false)}
-                >
-                  Hide Table
-                </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setShow(false)}
+                  >
+                    Hide Table
+                  </Button>
 
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={clearOverrides}
-                >
-                  Clear
-                </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={clearOverrides}
+                  >
+                    Clear
+                  </Button>
 
-                {/* New: I want a loan */}
-                <Button
-                  variant="contained"
-                  color="success"
-                  sx={{ textTransform: "none", fontWeight: 600 }}
-                  onClick={() => navigate("/home/loan-application")}
-                >
-                  Apply for Loan
-                </Button>
-              </Stack>
+                  {/* New: I want a loan */}
+                  <Button
+                    variant="contained"
+                    color="success"
+                    sx={{ textTransform: "none", fontWeight: 600 }}
+                    onClick={() => navigate("/home/loan-application")}
+                  >
+                    Apply for Loan
+                  </Button>
+                </Stack>
+              </Grid>
             </Grid>
-          </Grid>
+          </form>
 
           {show && schedule.length > 0 && (
             <>
@@ -252,8 +294,8 @@ export default function Body() {
                   <Typography variant="subtitle1" fontWeight={600} mb={1}>
                     Ending Balance by Period
                   </Typography>
-                  <Box sx={{ width: "100%", height: 320 }}>
-                    <ResponsiveContainer>
+                  <Box sx={{ width: "100%", height: 320, minHeight: 320 }}>
+                    <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
                         data={chartData}
                         margin={{

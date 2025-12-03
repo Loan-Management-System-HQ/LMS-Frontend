@@ -15,6 +15,8 @@ import {
 } from "@mui/material";
 import { CloudUpload, Delete, CheckCircle, FileText } from "lucide-react";
 import "./LoanDocumentUpload.css";
+import AlertBox from "../components/AlertBox";
+import { documentService } from "../services/documentService";
 
 interface UploadedFile {
     name: string;
@@ -22,6 +24,7 @@ interface UploadedFile {
     size: number;
     progress: number;
     status: "uploading" | "completed" | "error";
+    error?: string;
 }
 
 const LoanDocumentUpload: React.FC = () => {
@@ -29,6 +32,11 @@ const LoanDocumentUpload: React.FC = () => {
     const navigate = useNavigate();
     const [files, setFiles] = useState<UploadedFile[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+
+    // Alert state
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [alertSeverity, setAlertSeverity] = useState<"success" | "error" | "warning" | "info">("success");
 
     // Required documents list
     const requiredDocs = [
@@ -38,9 +46,12 @@ const LoanDocumentUpload: React.FC = () => {
         "Bank Statement (Last 6 months)",
     ];
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
-            const newFiles = Array.from(event.target.files).map((file) => ({
+            const newFiles = Array.from(event.target.files);
+
+            // Add to state first
+            const fileObjects: UploadedFile[] = newFiles.map((file) => ({
                 name: file.name,
                 type: file.type,
                 size: file.size,
@@ -48,45 +59,74 @@ const LoanDocumentUpload: React.FC = () => {
                 status: "uploading" as const,
             }));
 
-            setFiles((prev) => [...prev, ...newFiles]);
-            simulateUpload(newFiles);
+            setFiles((prev) => [...prev, ...fileObjects]);
+            setIsUploading(true);
+
+            // Upload each file
+            for (let i = 0; i < newFiles.length; i++) {
+                const file = newFiles[i];
+                try {
+                    // Determine document type based on file name or just use 'OTHER' for now
+                    // In a real app, user might select type. defaulting to 'OTHER' or mapping based on requirements.
+                    // The backend supports: IDENTITY, INCOME_PROOF, BANK_STATEMENT, CREDIT_REPORT, OTHER
+                    let docType = "OTHER";
+                    const lowerName = file.name.toLowerCase();
+                    if (lowerName.includes("passport") || lowerName.includes("license") || lowerName.includes("id")) docType = "IDENTITY";
+                    else if (lowerName.includes("paystub") || lowerName.includes("salary")) docType = "INCOME_PROOF";
+                    else if (lowerName.includes("bank") || lowerName.includes("statement")) docType = "BANK_STATEMENT";
+                    else if (lowerName.includes("credit") || lowerName.includes("score")) docType = "CREDIT_REPORT";
+
+                    await documentService.uploadDocument(file, docType, "Uploaded via Loan Application", loanId);
+
+                    setFiles((prev) =>
+                        prev.map((f) =>
+                            f.name === file.name ? { ...f, status: "completed", progress: 100 } : f
+                        )
+                    );
+                } catch (error) {
+                    console.error(`Failed to upload ${file.name}`, error);
+                    setFiles((prev) =>
+                        prev.map((f) =>
+                            f.name === file.name ? { ...f, status: "error", error: "Upload failed" } : f
+                        )
+                    );
+                    setAlertMessage(`Failed to upload ${file.name}`);
+                    setAlertSeverity("error");
+                    setAlertOpen(true);
+                }
+            }
+            setIsUploading(false);
         }
     };
 
-    const simulateUpload = (newFiles: UploadedFile[]) => {
-        setIsUploading(true);
-
-        newFiles.forEach((file, _index) => {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-
-                setFiles((prevFiles) =>
-                    prevFiles.map((f) =>
-                        f.name === file.name ? { ...f, progress: Math.min(progress, 100) } : f
-                    )
-                );
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setFiles((prevFiles) =>
-                        prevFiles.map((f) =>
-                            f.name === file.name ? { ...f, status: "completed" } : f
-                        )
-                    );
-                    setIsUploading(false);
-                }
-            }, 300);
-        });
-    };
-
     const handleDelete = (fileName: string) => {
+        // Note: This only removes from UI list. 
+        // To delete from server, we'd need the document ID returned from upload.
+        // For now, just removing from UI as per original requirement scope.
         setFiles((prev) => prev.filter((f) => f.name !== fileName));
     };
 
     const handleFinish = () => {
-        alert("Documents uploaded successfully! Your application is now under review.");
-        navigate("/home/loan-application");
+        // Check if any files failed
+        if (files.some(f => f.status === "error")) {
+            setAlertMessage("Some files failed to upload. Please retry them.");
+            setAlertSeverity("error");
+            setAlertOpen(true);
+            return;
+        }
+
+        setAlertMessage("Documents uploaded successfully! Your application is now under review.");
+        setAlertSeverity("success");
+        setAlertOpen(true);
+
+        // Navigate after a delay to allow user to read the alert
+        setTimeout(() => {
+            navigate("/home/loan-status");
+        }, 3000);
+    };
+
+    const handleCloseAlert = () => {
+        setAlertOpen(false);
     };
 
     return (
@@ -104,7 +144,7 @@ const LoanDocumentUpload: React.FC = () => {
                     Upload Documents
                 </Typography>
                 <Typography variant="subtitle1" className="upload-subtitle">
-                    Application ID: <strong>#{loanId}</strong>
+                    Application ID: <strong>#{loanId ? loanId.substring(0, 8) : 'Unknown'}</strong>
                 </Typography>
 
                 <Alert severity="info" className="upload-alert">
@@ -151,20 +191,28 @@ const LoanDocumentUpload: React.FC = () => {
                                 <ListItemIcon>
                                     {file.status === "completed" ? (
                                         <CheckCircle color="green" size={24} />
+                                    ) : file.status === "error" ? (
+                                        <Delete color="red" size={24} />
                                     ) : (
                                         <FileText color="#64748b" size={24} />
                                     )}
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={file.name}
+                                    secondaryTypographyProps={{ component: "div" }}
                                     secondary={
                                         <div className="file-progress-container">
                                             {file.status === "uploading" && (
-                                                <LinearProgress variant="determinate" value={file.progress} sx={{ mt: 1 }} />
+                                                <LinearProgress variant="indeterminate" sx={{ mt: 1 }} />
                                             )}
                                             {file.status === "completed" && (
                                                 <span className="upload-complete-text">
                                                     Upload Complete
+                                                </span>
+                                            )}
+                                            {file.status === "error" && (
+                                                <span style={{ color: "red" }}>
+                                                    Upload Failed
                                                 </span>
                                             )}
                                         </div>
@@ -187,6 +235,13 @@ const LoanDocumentUpload: React.FC = () => {
                     </Button>
                 </div>
             </Paper>
+
+            <AlertBox
+                open={alertOpen}
+                message={alertMessage}
+                severity={alertSeverity}
+                onClose={handleCloseAlert}
+            />
         </div>
     );
 };

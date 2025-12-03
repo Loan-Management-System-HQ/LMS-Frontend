@@ -1,70 +1,58 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import "./Forgot.css";
 
 const Forgot: React.FC = () => {
     const navigate = useNavigate();
-
     const [step, setStep] = useState(1); // 1: Email, 2: Reset
-    const [email, setEmail] = useState("");
-    const [code, setCode] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
     const [message, setMessage] = useState("");
 
-    const validateEmail = (value: string) =>
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    // Formik for Step 1: Email
+    const emailFormik = useFormik({
+        initialValues: {
+            email: "",
+        },
+        validationSchema: Yup.object({
+            email: Yup.string()
+                .email("Invalid email address")
+                .required("Email is required"),
+        }),
+        onSubmit: (values) => {
+            // Simulate API call to send code
+            setTimeout(() => {
+                setStep(2);
+                setMessage(`Verification code sent to ${values.email}`);
+            }, 500);
+        },
+    });
 
-    const isAlphanumeric = (str: string) => /^[a-zA-Z0-9]+$/.test(str);
-
-    const handleSendCode = () => {
-        setError("");
-        setMessage("");
-
-        if (!email.trim()) {
-            setError("Please enter your email address.");
-            return;
-        }
-        if (!validateEmail(email)) {
-            setError("Please enter a valid email address.");
-            return;
-        }
-
-        // Simulate API call to send code
-        setTimeout(() => {
-            setStep(2);
-            setMessage(`Verification code sent to ${email}`);
-        }, 500);
-    };
-
-    const handleSave = () => {
-        setError("");
-        setMessage("");
-
-        if (!code.trim()) {
-            setError("Please enter the verification code.");
-            return;
-        }
-        if (!newPassword) {
-            setError("Please enter a new password.");
-            return;
-        }
-        if (!isAlphanumeric(newPassword)) {
-            setError("Password must be alphanumeric (letters and numbers only).");
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            setError("Passwords do not match.");
-            return;
-        }
-
-        // Simulate API call to reset password
-        setTimeout(() => {
-            alert("Password changed successfully!");
-            navigate("/signin");
-        }, 500);
-    };
+    // Formik for Step 2: Reset Password
+    const resetFormik = useFormik({
+        initialValues: {
+            code: "",
+            newPassword: "",
+            confirmPassword: "",
+        },
+        validationSchema: Yup.object({
+            code: Yup.string().required("Verification code is required"),
+            newPassword: Yup.string()
+                .min(8, "Password must be at least 8 characters")
+                .matches(/^[a-zA-Z0-9]+$/, "Password must be alphanumeric")
+                .required("New password is required"),
+            confirmPassword: Yup.string()
+                .oneOf([Yup.ref("newPassword")], "Passwords must match")
+                .required("Confirm password is required"),
+        }),
+        onSubmit: (_values) => {
+            // Simulate API call to reset password
+            setTimeout(() => {
+                alert("Password changed successfully!");
+                navigate("/signin");
+            }, 500);
+        },
+    });
 
     return (
         <div className="body-container forgot-wrapper">
@@ -72,63 +60,88 @@ const Forgot: React.FC = () => {
                 <h2 className="forgot-title">Forgot Password</h2>
 
                 {step === 1 && (
-                    <>
+                    <form onSubmit={emailFormik.handleSubmit}>
                         <div className="field">
                             <span>Email Address</span>
                             <input
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                name="email"
+                                value={emailFormik.values.email}
+                                onChange={emailFormik.handleChange}
+                                onBlur={emailFormik.handleBlur}
                                 placeholder="Enter your registered email"
                             />
+                            {emailFormik.touched.email && emailFormik.errors.email ? (
+                                <p className="error-text">{emailFormik.errors.email}</p>
+                            ) : null}
                         </div>
-                        {error && <p className="error-text">{error}</p>}
-                        <button className="action-btn" onClick={handleSendCode}>
-                            Send Verification Code
+                        <button
+                            type="submit"
+                            className="action-btn"
+                            disabled={!emailFormik.isValid || !emailFormik.dirty || emailFormik.isSubmitting}
+                        >
+                            {emailFormik.isSubmitting ? "Sending..." : "Send Verification Code"}
                         </button>
-                    </>
+                    </form>
                 )}
 
                 {step === 2 && (
-                    <>
+                    <form onSubmit={resetFormik.handleSubmit}>
                         {message && <p className="success-text">{message}</p>}
 
                         <div className="field">
                             <span>Verification Code</span>
                             <input
                                 type="text"
-                                value={code}
-                                onChange={(e) => setCode(e.target.value)}
+                                name="code"
+                                value={resetFormik.values.code}
+                                onChange={resetFormik.handleChange}
+                                onBlur={resetFormik.handleBlur}
                                 placeholder="Enter code"
                             />
+                            {resetFormik.touched.code && resetFormik.errors.code ? (
+                                <p className="error-text">{resetFormik.errors.code}</p>
+                            ) : null}
                         </div>
 
                         <div className="field">
                             <span>New Password</span>
                             <input
                                 type="password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
+                                name="newPassword"
+                                value={resetFormik.values.newPassword}
+                                onChange={resetFormik.handleChange}
+                                onBlur={resetFormik.handleBlur}
                                 placeholder="Enter new password"
                             />
+                            {resetFormik.touched.newPassword && resetFormik.errors.newPassword ? (
+                                <p className="error-text">{resetFormik.errors.newPassword}</p>
+                            ) : null}
                         </div>
 
                         <div className="field">
                             <span>Confirm Password</span>
                             <input
                                 type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                name="confirmPassword"
+                                value={resetFormik.values.confirmPassword}
+                                onChange={resetFormik.handleChange}
+                                onBlur={resetFormik.handleBlur}
                                 placeholder="Confirm new password"
                             />
+                            {resetFormik.touched.confirmPassword && resetFormik.errors.confirmPassword ? (
+                                <p className="error-text">{resetFormik.errors.confirmPassword}</p>
+                            ) : null}
                         </div>
 
-                        {error && <p className="error-text">{error}</p>}
-
-                        <button className="action-btn" onClick={handleSave}>
-                            Save New Password
+                        <button
+                            type="submit"
+                            className="action-btn"
+                            disabled={!resetFormik.isValid || !resetFormik.dirty || resetFormik.isSubmitting}
+                        >
+                            {resetFormik.isSubmitting ? "Saving..." : "Save New Password"}
                         </button>
-                    </>
+                    </form>
                 )}
 
                 <Link to="/signin" className="back-link">
